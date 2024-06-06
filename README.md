@@ -1,6 +1,6 @@
 ![World Clocks](https://github.com/sourceduty/World-Clocks-Live-Wallpaper/assets/123030236/c94cd1e0-40d2-4819-9882-a3478c237342)
 
-> Animated and synchronized world clocks live wallpaper for Python.
+> Animated and synchronized world clocks live wallpaper.
 
 #
 
