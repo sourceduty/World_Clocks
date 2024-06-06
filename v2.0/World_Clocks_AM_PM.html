@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Clocks Live Wallpaper</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="wallpaperCanvas"></canvas>
+    <script>
+        const timeZones = {
+            'America/New_York': 'NEW YORK',
+            'Europe/London': 'LONDON',
+            'Europe/Paris': 'PARIS',
+            'America/Toronto': 'TORONTO',
+            'Europe/Moscow': 'MOSCOW',
+            'Asia/Tokyo': 'TOKYO'
+        };
+
+        const canvas = document.getElementById('wallpaperCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function getCurrentTime(timeZone) {
+            return new Date(new Date().toLocaleString("en-US", { timeZone }));
+        }
+
+        function formatTime(date) {
+            let hours = date.getHours();
+            const minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const strMinutes = minutes < 10 ? '0' + minutes : minutes;
+            const strTime = hours + ':' + strMinutes + ' ' + ampm;
+            return strTime;
+        }
+
+        function drawClock(x, y, radius, city, timeZone) {
+            const currentTime = getCurrentTime(timeZone);
+            const hours = currentTime.getHours() % 12;
+            const minutes = currentTime.getMinutes();
+            const seconds = currentTime.getSeconds();
+            const milliseconds = currentTime.getMilliseconds();
+            const formattedTime = formatTime(currentTime);
+
+            const hourAngle = (Math.PI / 6) * (hours + minutes / 60);
+            const minuteAngle = (Math.PI / 30) * (minutes + seconds / 60);
+            const secondAngle = (Math.PI / 30) * (seconds + milliseconds / 1000);
+
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = `${radius / 5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText(city, x, y - radius - 20);
+
+            function drawHand(angle, length, width) {
+                ctx.lineWidth = width;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + length * Math.cos(angle - Math.PI / 2), y + length * Math.sin(angle - Math.PI / 2));
+                ctx.stroke();
+            }
+
+            drawHand(hourAngle, radius * 0.5, 6);
+            drawHand(minuteAngle, radius * 0.8, 4);
+            drawHand(secondAngle, radius * 0.9, 2);
+
+            ctx.font = `${radius / 6}px Arial`;
+            ctx.fillText(formattedTime, x, y + radius + 30);
+        }
+
+        function drawClocks() {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const clockRadius = Math.min(canvas.width, canvas.height) / 10;
+            const clockSpacing = canvas.width / (Object.keys(timeZones).length + 1);
+
+            let xPosition = clockSpacing;
+            const yPosition = canvas.height / 2;
+
+            Object.entries(timeZones).forEach(([timeZone, city]) => {
+                drawClock(xPosition, yPosition, clockRadius, city, timeZone);
+                xPosition += clockSpacing;
+            });
+        }
+
+        function updateClocks() {
+            drawClocks();
+            requestAnimationFrame(updateClocks);
+        }
+
+        updateClocks();
+    </script>
+</body>
+</html>
